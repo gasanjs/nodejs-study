@@ -1,5 +1,9 @@
 # khw 디렉토리 입니다 :stuck_out_tongue_winking_eye:
 ## Study Log...
+- 2020-06-10   
+add [chapter_8](./chapter_8)
+- 2020-06-03   
+add [chapter_7](./chapter_7)
 - 2020-05-20   
 add [chapter_6](./chapter_6)
 - 2020-05-12  
