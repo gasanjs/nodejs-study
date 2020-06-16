@@ -7,14 +7,23 @@ const path = require('path');
 const session = require('express-session');
 const flash = require('connect-flash');
 
+//passport 설정
+const passport = require('passport')
+const passportConfig = require('./passport')
+passportConfig(passport);
+
+//.env 설정
 require('dotenv').config();
 
+//Router 설정
 const pageRouter = require('./routes/page');
+const authRouter = require('./routes/auth');
 
+//Sequelize 설정
 const {sequelize} = require('./models')
+sequelize.sync();
 
 const app = express();
-sequelize.sync();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -39,8 +48,12 @@ app.use(session({
 }));
 
 app.use(flash());
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.use('/', pageRouter);
+app.use('/auth', authRouter);
+
 
 
 // catch 404 and forward to error handler

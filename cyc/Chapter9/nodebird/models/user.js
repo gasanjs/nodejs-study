@@ -7,11 +7,11 @@ module.exports = (sequelize, DataTypes) => (
     },
     nick: {
       type: DataTypes.STRING(15),
-      allowNull: false
+      allowNull: false,
     },
     password: {
       type: DataTypes.STRING(100),
-      allowNull: true
+      allowNull: true,
     },
     provider: {
       type: DataTypes.STRING(10),
@@ -20,10 +20,10 @@ module.exports = (sequelize, DataTypes) => (
     },
     snsId: {
       type: DataTypes.STRING(30),
-      allowNull: true
+      allowNull: true,
     },
   }, {
     timestamps: true,
-    paranoid: true
+    paranoid: true,
   })
-)
+);
