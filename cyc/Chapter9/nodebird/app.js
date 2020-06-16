@@ -18,6 +18,7 @@ require('dotenv').config();
 //Router 설정
 const pageRouter = require('./routes/page');
 const authRouter = require('./routes/auth');
+const postRouter = require('./routes/post');
 
 //Sequelize 설정
 const {sequelize} = require('./models')
@@ -53,6 +54,7 @@ app.use(passport.session());
 
 app.use('/', pageRouter);
 app.use('/auth', authRouter);
+app.use('/post', postRouter);
 
 
 
