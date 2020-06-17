@@ -3,8 +3,8 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
-const { Post, Hashtag, User } = require('../models');
-const { isLoggedIn } = require('./middlewares');
+const {Post, Hashtag, User} = require('../models');
+const {isLoggedIn} = require('./middlewares');
 
 const router = express.Router();
 
@@ -25,12 +25,12 @@ const upload = multer({
       cb(null, path.basename(file.originalname, ext) + Date.now() + ext);
     },
   }),
-  limits: { fileSize: 5 * 1024 * 1024 },
+  limits: {fileSize: 5 * 1024 * 1024},
 });
 
 router.post('/img', isLoggedIn, upload.single('img'), (req, res) => {
   console.log(req.file);
-  res.json({ url: `/img/${req.file.filename}` });
+  res.json({url: `/img/${req.file.filename}`});
 });
 
 const upload2 = multer();
@@ -44,7 +44,7 @@ router.post('/', isLoggedIn, upload2.none(), async (req, res, next) => {
     const hashtags = req.body.content.match(/#[^\s#]*/g);
     if (hashtags) {
       const result = await Promise.all(hashtags.map(tag => Hashtag.findOrCreate({
-        where: { title: tag.slice(1).toLowerCase() },
+        where: {title: tag.slice(1).toLowerCase()},
       })));
       await post.addHashtags(result.map(r => r[0]));
     }
@@ -54,5 +54,47 @@ router.post('/', isLoggedIn, upload2.none(), async (req, res, next) => {
     next(error);
   }
 });
+
+router.post('/:id/like', isLoggedIn,
+  async (req, res, next) => {
+    try {
+      const user = await User.findOne({where: {id: req.user.id}});
+      const post = await Post.findOne({where: {id: req.params.id}});
+      console.log(user);
+      console.log(post);
+      // await post.addLikeUsers(user);
+      await user.addLikePosts(parseInt(req.params.id, 10));
+      res.send('success');
+    } catch (err) {
+      console.error(err);
+      next(err);
+    }
+  });
+
+router.post('/:id/unlike', isLoggedIn,
+  async (req, res, next) => {
+    try {
+      const user = await User.findOne({where: {id: req.user.id}});
+      const post = await Post.findOne({where: {id: req.params.id}});
+      await user.removeLikePosts(post);
+      res.send('accept');
+    } catch (err) {
+      console.error(err);
+      next(err);
+    }
+  });
+
+router.delete('/:id', isLoggedIn,
+  async (req, res, next) => {
+    try {
+      const user = await User.findOne({where: {id: req.user.id}});
+      const post = await Post.findOne({where: {id: req.params.id}});
+      post.destroy();
+      res.send('accept');
+    } catch (err) {
+      console.error(err);
+      next(err);
+    }
+  });
 
 module.exports = router;

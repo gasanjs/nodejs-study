@@ -1,6 +1,6 @@
 const local = require('./localStrategy');
 const kakao = require('./kakaoStrategy');
-const {User} = require('../models');
+const {User, Post} = require('../models');
 
 module.exports = (passport) => {
   //req.session 객체에 저장할 데이터를 선택
@@ -24,7 +24,12 @@ module.exports = (passport) => {
         model: User,
         attributes: ['id', 'nick'],
         as: 'Followings',
-      }],
+      }, {
+        model: Post,
+        attributes: ['id'],
+        as: 'LikePosts',
+      }
+      ],
     })
       .then(user => done(null, user))
       .catch(err => done(err));
