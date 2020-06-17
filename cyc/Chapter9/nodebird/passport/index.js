@@ -1,6 +1,6 @@
 const local = require('./localStrategy');
 const kakao = require('./kakaoStrategy');
-const { User } = require('../models');
+const {User} = require('../models');
 
 module.exports = (passport) => {
   //req.session 객체에 저장할 데이터를 선택
@@ -15,7 +15,17 @@ module.exports = (passport) => {
   //serializeUser에서 저장한 user.id를 이용하여 데이터베이스에서 사용자 정보 조회
   //req.user에 저장함
   passport.deserializeUser((id, done) => {
-    User.findOne({ where: { id } })
+    User.findOne({
+      where: {id}, include: [{
+        model: User,
+        attributes: ['id', 'nick'],
+        as: 'Followers',
+      }, {
+        model: User,
+        attributes: ['id', 'nick'],
+        as: 'Followings',
+      }],
+    })
       .then(user => done(null, user))
       .catch(err => done(err));
   });
