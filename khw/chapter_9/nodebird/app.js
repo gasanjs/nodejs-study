@@ -4,11 +4,23 @@ const logger = require('morgan');
 const path = require('path');
 const session = require('express-session');
 const flash = require('connect-flash');
+
+const passport = require('passport');
 require('dotenv').config();
+
 const pageRouter = require('./routes/page');
-const { sequelize } = require('./models')
+const authRouter = require('./routes/auth');
+const postRouter = require('./routes/post');
+const userRouter = require('./routes/user');
+
+const { sequelize } = require('./models');
+const passportConfig = require('./passport');
+
 const app = express();
+
 sequelize.sync();
+passportConfig(passport);
+
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 app.set('port', process.env.PORT || 8001);
@@ -28,8 +40,12 @@ app.use(session({
   },
 }));
 app.use(flash());
-
+app.use(passport.initialize());
+app.use(passport.session());
 app.use('/', pageRouter);
+app.use('/auth', authRouter);
+app.use('/post', postRouter);
+app.use('/user', userRouter);
 
 app.use((req, res, next) => {
   const err = new Error('Not Found');
@@ -47,4 +63,3 @@ app.use((req, res, next) => {
 app.listen(app.get('port'), () => {
   console.log(app.get('port'), '번 포트에서 대기 중');
 });
-
