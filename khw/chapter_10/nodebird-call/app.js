@@ -1,31 +1,19 @@
 const express = require('express');
 const path = require('path');
-const cookieParser = require('cookie-parser');
-const passport = require('passport');
 const morgan = require('morgan');
+const cookieParser = require('cookie-parser');
 const session = require('express-session');
-const flash = require('connect-flash');
-require('dotenv').config;
+require('dotenv').config();
 
-const { sequelize } = require('./models');
-const passportConfig = require('./passport');
-
-const authRouter = require('./routes/auth');
 const indexRouter = require('./routes');
-const v1 = require('./routes/v1')
 
 const app = express();
-sequelize.sync();
-passportConfig(passport);
 
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
-app.set('port', process.env.PORT || 8002);
+app.set('port', process.env.PORT || 8003);
 
 app.use(morgan('dev'));
-app.use(express.static(path.join(__dirname, 'public')));
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser(process.env.COOKIE_SECRET));
 app.use(session({
   resave: false,
@@ -33,16 +21,11 @@ app.use(session({
   secret: process.env.COOKIE_SECRET,
   cookie: {
     httpOnly: true,
-    secure: false
-  }
+    secure: false,
+  },
 }));
-app.use(flash());
-app.use(passport.initialize());
-app.use(passport.session());
 
-app.use('/auth', authRouter);
 app.use('/', indexRouter);
-app.use('/v1', v1);
 
 app.use((req, res, next) => {
   const err = new Error('Not Found');
@@ -59,4 +42,4 @@ app.use((err, req, res, next) => {
 
 app.listen(app.get('port'), () => {
   console.log(app.get('port'), '번 포트에서 대기중');
-})
+});
