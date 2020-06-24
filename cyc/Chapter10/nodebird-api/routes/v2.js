@@ -1,16 +1,29 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
+const cors = require('cors')
+const url = require('url');
 
-const { verifyToken, apiLimiter } = require('./middlewares');
-const { Domain, User, Post, Hashtag } = require('../models');
+const {verifyToken, apiLimiter} = require('./middlewares');
+const {Domain, User, Post, Hashtag} = require('../models');
 
 const router = express.Router();
 
+router.use(async (req, res, next) => {
+  const domain = await Domain.find({
+    where: { host: url.parse(req.get('origin')).host },
+  });
+  if (domain) {
+    cors({ origin: req.get('origin') })(req, res, next);
+  } else {
+    next();
+  }
+});
+
 router.post('/token', apiLimiter, async (req, res) => {
-  const { clientSecret } = req.body;
+  const {clientSecret} = req.body;
   try {
     const domain = await Domain.find({
-      where: { clientSecret },
+      where: {clientSecret},
       include: {
         model: User,
         attribute: ['nick', 'id'],
@@ -48,7 +61,7 @@ router.get('/test', verifyToken, apiLimiter, (req, res) => {
 });
 
 router.get('/posts/my', apiLimiter, verifyToken, (req, res) => {
-  Post.findAll({ where: { userId: req.decoded.id } })
+  Post.findAll({where: {userId: req.decoded.id}})
     .then((posts) => {
       console.log(posts);
       res.json({
@@ -67,7 +80,7 @@ router.get('/posts/my', apiLimiter, verifyToken, (req, res) => {
 
 router.get('/posts/hashtag/:title', verifyToken, apiLimiter, async (req, res) => {
   try {
-    const hashtag = await Hashtag.find({ where: { title: req.params.title } });
+    const hashtag = await Hashtag.find({where: {title: req.params.title}});
     if (!hashtag) {
       return res.status(404).json({
         code: 404,
@@ -87,5 +100,7 @@ router.get('/posts/hashtag/:title', verifyToken, apiLimiter, async (req, res) =>
     });
   }
 });
+
+
 
 module.exports = router;
